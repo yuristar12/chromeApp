@@ -1,19 +1,21 @@
 {
-  "name": "chromeApp",
+  "name": "meixidouyin",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build"
+    "build": "vite build"
   },
   "dependencies": {
     "chrome-types": "^0.1.291",
     "vue": "^3.3"
   },
   "devDependencies": {
+    "@arco-design/web-vue": "^2.55.3",
     "@types/webextension-polyfill": "^0.10.0",
     "@vitejs/plugin-vue": "^4.5.0",
+    "less": "^4.2.0",
     "typescript": "^5.3.2",
     "vite": "^5.0.0",
     "vite-plugin-web-extension": "^4.0.0",

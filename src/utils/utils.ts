@@ -15,3 +15,22 @@ export const GetTabsIdByUrl = async (url: string) => {
 
 
 }
+
+export const GetRangeByRandom = (min: number, max: number) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+export const Sleep = async (time: number) => {
+
+    return new Promise((resolve) => {
+
+        setInterval(() => {
+            resolve(true);
+        }, time);
+
+    })
+
+}
