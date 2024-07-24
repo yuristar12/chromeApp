@@ -14,7 +14,7 @@ browser.runtime.onInstalled.addListener((details) => {
 });
 
 
-let limitParams = {
+let limitParams: TypeByHandleLimitParams = {
     likeTimeByMin: 5,
     likeTimeByMax: 13,
     nextVideoTimeMin: 3,
@@ -24,11 +24,12 @@ let limitParams = {
     ageByMin: 20,
     ageByMax: 50,
     limitByLike: 50,
+    limitByWaiteTime: 3
 }
 
 
 const handlingStatus: TypeByHandlingStatus = {
-    ing: false, ingStatusList: [], isInit: false
+    ing: false, ingStatusList: [], isInit: false, executeNum: 1000,
 }
 
 
@@ -43,6 +44,12 @@ async function beforeStartHandle(callback: (params: TypeByHandleStatus) => void)
     }
 
     return new Promise(async (resolve) => {
+        if (handlingStatus.executeNum <= 0) {
+            result.status = false;
+            result.message = '请设置执行次数！';
+            resolve(result);
+        }
+
         const id = await GetTabsIdByUrl('https://www.douyin.com');
         if (id) {
             chrome.scripting.executeScript({
@@ -89,22 +96,62 @@ async function startHandle() {
         const res = await startHandleItem();
         handlingStatus.ingStatusList.push(res);
         let nextTime = 0;
-        if ((res as string).indexOf('广告') !== -1) {
+        if ((res.message).indexOf('广告') !== -1) {
             nextTime = 1000;
-        } else if ((res as string).indexOf('未获取') !== -1) {
+        } else if ((res.message).indexOf('未获取') !== -1) {
             nextTime = 1000;
         }
         else {
+            if (res.userInfo) {
+                chrome.runtime.sendMessage({ key: 'onExecutedItem', value: res });
+            }
             nextTime = GetRangeByRandom((limitParams as TypeByHandleLimitParams).nextVideoTimeMin, (limitParams as TypeByHandleLimitParams).nextVideoTimeMax) * 1000;
         }
         if (handlingStatus.ing) {
             await Sleep(nextTime);
         }
+        handlingStatus.executeNum -= 1;
+        if (handlingStatus.executeNum <= 0) {
+
+
+
+
+            onExecuted();
+        }
+
     }
 }
 
 
-async function startHandleItem() {
+
+
+
+
+
+
+
+async function onExecuted() {
+    handlingStatus.ing = false;
+    chrome.runtime.sendMessage({ key: 'onExecuted', value: handlingStatus });
+    const id = await GetTabsIdByUrl('https://www.douyin.com');
+    chrome.scripting.executeScript({
+        target: { tabId: id }, func: async () => {
+            window.douyinCore.reload();
+            handlingStatus.executeNum = 99;
+            return true;
+        }, world: "MAIN"
+    }).then(res => {
+        chrome.notifications.create({
+            title: '魅熙抖音插件',
+            message: '已完成上次任务设置的次数，已刷新页面！',
+            iconUrl: 'https://test-technology.oss-cn-hangzhou.aliyuncs.com/Web/system/20240715/image/bdb0c9b0c30dce2e399b52055b9e197e.png',
+            type: 'basic'
+        });
+    })
+}
+
+
+async function startHandleItem(): Promise<TypeByHandleStatus> {
 
     return new Promise(async (resolve) => {
 
@@ -121,7 +168,7 @@ async function startHandleItem() {
                 if (Array.isArray(res)) {
                     resolve(res[0].result);
                 }
-                resolve(null);
+                resolve({ status: false, message: '未知问题' });
             })
         }
     })
@@ -222,7 +269,8 @@ chrome.runtime.onMessage.addListener((message: { key: string, value: any }, send
             break;
         case 'onSyncStorage':
             handlingStatus.ing = false;
-            syncStorage(message.value, sendResponse);
+            syncStorage(message.value.limitParams, sendResponse);
+            Object.assign(handlingStatus, handlingStatus);
             break;
         case 'onStartAutoHandle':
             beforeStartHandle(sendResponse);

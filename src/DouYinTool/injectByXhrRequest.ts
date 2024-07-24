@@ -30,7 +30,7 @@ export function injectByXhrRequest() {
         },
 
         registerRequestHookByRequest: () => {
-            injectUtils.requestHookMapByRequest.set('aweme/v1/web/danmaku/get_v2/', (request: XMLHttpRequest) => {
+            injectUtils.requestHookMapByRequest.set('/feed/', (request: XMLHttpRequest) => {
                 injectUtils.getCore().auth = (injectUtils.deParseUrlParams(request.responseURL) as TypeByAuthonParams);
             })
 
@@ -54,18 +54,22 @@ export function injectByXhrRequest() {
                 this.addEventListener('load', function () {
                     const that: (XMLHttpRequest & { _url }) = this;
                     if (that.response && typeof that.response === 'string') {
-                        const parseData = JSON.parse(that.response);
-                        injectUtils.requestHookMapByResponse.forEach((value: (data: any) => void, key: string) => {
-                            if ((that._url as string).indexOf(key) !== -1) {
-                                value(parseData);
-                            }
-                        })
+                        try {
+                            const parseData = JSON.parse(that.response);
+                            injectUtils.requestHookMapByResponse.forEach((value: (data: any) => void, key: string) => {
+                                if ((that._url as string).indexOf(key) !== -1) {
+                                    value(parseData);
+                                }
+                            })
 
-                        injectUtils.requestHookMapByRequest.forEach((value: (data: any) => void, key: string) => {
-                            if ((that._url as string).indexOf(key) !== -1) {
-                                value(that);
-                            }
-                        })
+                            injectUtils.requestHookMapByRequest.forEach((value: (data: any) => void, key: string) => {
+                                if ((that._url as string).indexOf(key) !== -1) {
+                                    value(that);
+                                }
+                            })
+                        } catch (error) {
+
+                        }
                     }
                 });
                 return originalXHRSend.apply(this, arguments);

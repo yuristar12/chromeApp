@@ -24,9 +24,9 @@
     "activeTab",
     "webRequest",
     "webRequestBlocking",
-    "<all_urls>",
     "storage",
-    "notifications"
+    "notifications",
+    "webRequest"
   ],
   "host_permissions": ["<all_urls>"]
 }

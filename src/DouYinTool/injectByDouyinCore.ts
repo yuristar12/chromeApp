@@ -21,7 +21,8 @@ export function injectByDouyinCore() {
             limitByFocusNum: 500,
             ageByMin: 20,
             ageByMax: 50,
-            limitByLike:500,
+            limitByLike: 500,
+            limitByWaiteTime: 3
 
         },
         getRangeByRandom(min, max) {
@@ -31,7 +32,10 @@ export function injectByDouyinCore() {
         },
         judgeByLogin: async () => {
             const userInfo = window.localStorage.getItem('user_info');
-            return userInfo ? true : false
+            return userInfo ? JSON.parse(userInfo) : false
+        },
+        reload: () => {
+            location.reload();
         }
 
     }

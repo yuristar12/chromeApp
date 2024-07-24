@@ -442,3 +442,69 @@ captcha_container
 feed-follow-icon
 
 document.querySelectorAll("#slidelist div[data-e2e='feed-active-video']")[0].querySelectorAll("div[data-e2e='feed-follow-icon']")[0].childNodes[0].childNodes[0].click()
+
+// 下载客户端弹窗
+douyin-web-download-guide-container
+
+// 获取用户视频列表
+https://www.douyin.com/aweme/v1/web/aweme/post/
+device_platform: webapp
+aid: 6383
+channel: channel_pc_web
+sec_user_id: MS4wLjABAAAAVfkqGHJdFt1Bm_YdZxi0Kw_7wwhbxMVCjoqoBHbknFDa9AiAA5IlTO_RaaLyzs7Z
+max_cursor: 0
+locate_item_id: 7372222332321959203
+locate_query: false
+show_live_replay_strategy: 1
+need_time_list: 1
+time_list_query: 0
+whale_cut_token: 
+cut_version: 1
+count: 18
+publish_video_strategy_type: 2
+update_version_code: 170400
+pc_client_type: 1
+version_code: 290100
+version_name: 29.1.0
+cookie_enabled: true
+screen_width: 1512
+screen_height: 982
+browser_language: zh-CN
+browser_platform: MacIntel
+browser_name: Chrome
+browser_version: 126.0.0.0
+browser_online: true
+engine_name: Blink
+engine_version: 126.0.0.0
+os_name: Mac OS
+os_version: 10.15.7
+cpu_core_num: 8
+device_memory: 8
+platform: PC
+downlink: 10
+effective_type: 4g
+round_trip_time: 50
+webid: 7391374594643068416
+verifyFp: verify_lyl6d760_3kxygmsH_ZhvO_4KcH_8XfF_TdnDVzrECvVM
+fp: verify_lyl6d760_3kxygmsH_ZhvO_4KcH_8XfF_TdnDVzrECvVM
+msToken: __TePUaXeVQagCeBLNYJjIVDe1ZS_p8LmN5PMzdPeKn1shgvPFX3ABcjd1xPgZAkBR4WbFX6KiJ1Ja2a0hxmyDKAu4SR55G-T9FtJ0CksKu_8RvKdL4IV8umgiiKarw=
+a_bogus: dyRMQfhvDk2pDDyh53cLfY3q6VF3Yk2d0trEMD2fWxvDey39HMPU9exoB5Tv07SjNs/DIeLjy4heO3eMic2JA30R9RJOWI-Bs6k0tFcQ5xSSs1X9eLXgJ0iLmkt5SFn2RkrUrO78oiKSKRz0A2Fe-7qvyhnFwo8sNikW
+
+
+
+
+
+    nickname,  抖音昵称
+    ip_location, IP属地
+    uid, 抖音内部唯一id
+    unique_id, 抖音 id
+    aweme_count,视频总数量
+    city,城市
+    gender,性别 2是女 1是男
+    follower_count, 粉丝数量
+    following_count, 关注数
+    user_age, 用户年龄
+    signature, 签名
+    source_video_id, 来源视频 Id
+    source_video_time, 来源视频创建时间
+    last_activity_time 最后一条视频时间

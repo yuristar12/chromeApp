@@ -10,11 +10,30 @@
         插件配置
       </a-typography-title>
       <a-space align="end" style="width: 100%; justify-content: space-between;">
+        <a-typography-text>视频等待时间:</a-typography-text>
+        <a-input-number
+          v-model="limitParams.limitByWaiteTime"
+          :hide-button="true"
+          :min="3"
+          :max="limitParams.likeTimeByMax"
+          :style="{ width: '247px' }"
+          placeholder="最小值（秒）"
+          size="mini"
+        >
+          <template #append>
+            <a-typography-text>（秒）</a-typography-text>
+          </template>
+        </a-input-number>
+      </a-space>
+      <a-divider style="margin: 8px 0 0 0;" />
+      <a-space align="end" style="width: 100%; justify-content: space-between;">
         <a-typography-text>随机关注间隔:</a-typography-text>
         <a-input-group>
           <a-input-number
             v-model="limitParams.likeTimeByMin"
             :hide-button="true"
+            :min="3"
+            :disabled="disabledConfig"
             :max="limitParams.likeTimeByMax"
             :style="{ width: '110px' }"
             placeholder="最小值（秒）"
@@ -30,6 +49,7 @@
           <a-input-number
             v-model="limitParams.likeTimeByMax"
             :hide-button="true"
+            :disabled="disabledConfig"
             :min="limitParams.likeTimeByMin"
             :style="{ width: '110px' }"
             placeholder="最大值（秒）"
@@ -41,9 +61,7 @@
           </a-input-number>
         </a-input-group>
       </a-space>
-
       <a-divider style="margin: 8px 0 0 0;" />
-
       <a-space
         align="end"
         style="width: 100%; justify-content: space-between; margin-top: 8px;"
@@ -53,6 +71,8 @@
           <a-input-number
             v-model="limitParams.nextVideoTimeMin"
             :hide-button="true"
+            :min="3"
+            :disabled="disabledConfig"
             :max="limitParams.nextVideoTimeMax"
             :style="{ width: '110px' }"
             placeholder="最小值（秒）"
@@ -69,6 +89,7 @@
           <a-input-number
             v-model="limitParams.nextVideoTimeMax"
             :hide-button="true"
+            :disabled="disabledConfig"
             :min="limitParams.nextVideoTimeMin"
             :style="{ width: '110px' }"
             placeholder="最大值（秒）"
@@ -95,6 +116,7 @@
           v-model="limitParams.limitByFansNum"
           :hide-button="true"
           :min="0"
+          :disabled="disabledConfig"
           :style="{ width: '247px' }"
           placeholder=""
           size="mini"
@@ -123,6 +145,7 @@
           :style="{ width: '247px' }"
           placeholder=""
           size="mini"
+          :disabled="disabledConfig"
         >
           <template #append>
             <a-typography-text>以下关注</a-typography-text>
@@ -172,7 +195,6 @@
         </a-input-group>
       </a-space>
 
-      <!--  点赞过滤    -->
       <a-divider style="margin: 8px 0 0 0;" />
       <a-space
         align="end"
@@ -191,9 +213,34 @@
           :style="{ width: '247px' }"
           placeholder=""
           size="mini"
+          :disabled="disabledConfig"
         >
           <template #append>
             <a-typography-text>以下点赞</a-typography-text>
+          </template>
+        </a-input-number>
+      </a-space>
+      <a-divider style="margin: 8px 0 0 0;" />
+      <a-space
+        align="end"
+        style="width: 100%; justify-content: space-between; margin-top: 8px;"
+      >
+        <div>
+          <a-typography-text>执行次数:</a-typography-text>
+          <a-tooltip content="执行超过设置次数后将终止脚本执行">
+            <icon-info-circle-fill />
+          </a-tooltip>
+        </div>
+        <a-input-number
+          v-model="handlingStatus.executeNum"
+          :hide-button="true"
+          :min="0"
+          :style="{ width: '247px' }"
+          placeholder=""
+          size="mini"
+        >
+          <template #append>
+            <a-typography-text>次数</a-typography-text>
           </template>
         </a-input-number>
       </a-space>
@@ -238,6 +285,9 @@ import {
   TypeByHandlingStatus,
 } from '../type'
 import { Message } from '@arco-design/web-vue'
+import { ref } from 'vue'
+
+const disabledConfig = ref(true)
 
 const limitParams = reactive<TypeByHandleLimitParams>({
   likeTimeByMin: 0,
@@ -249,15 +299,75 @@ const limitParams = reactive<TypeByHandleLimitParams>({
   ageByMin: 0,
   ageByMax: 0,
   limitByLike: 0,
+  limitByWaiteTime: 0,
 })
 
 const handlingStatus = reactive<TypeByHandlingStatus>({
   ing: false,
   ingStatusList: [],
   isInit: false,
+  executeNum: 1000,
 })
 
+const onExecutedItem = async (value: TypeByHandleStatus) => {
+  const {
+    nickname,
+    ip_location,
+    uid,
+    unique_id,
+    aweme_count,
+    city,
+    gender,
+    follower_count,
+    following_count,
+    user_age,
+    signature,
+    source_video_id,
+    source_video_time,
+    last_activity_time,
+  } = value.userInfo.user
+  await requestByPost({
+    data: {
+      dyAccount: value.douyinAccount,
+      message: value.message,
+      status: value.status,
+      nickname,
+      ipLocation: ip_location,
+      uid,
+      uniqueId: unique_id,
+      awemeCount: aweme_count,
+      city,
+      gender,
+      followerCount: follower_count,
+      followingCount: following_count,
+      userAge: user_age,
+      signature,
+      sourceVideoid: source_video_id,
+      sourceVideoTime: source_video_time,
+      lastActivityTime: last_activity_time,
+      result: '',
+    },
+    url: 'https://oaadmin.meixioa.com/api/statistic/dy',
+  })
+}
+
 onMounted(() => {
+  chrome.runtime.onMessage.addListener(
+    (message: { key: string; value: any }) => {
+      switch (message.key) {
+        case 'onExecuted':
+          Object.assign(handlingStatus, message.value)
+          break
+        case 'onExecutedItem':
+          onExecutedItem(message.value)
+          break
+        default:
+          break
+      }
+      return true
+    },
+  )
+
   chrome.runtime.sendMessage(
     {
       key: 'onPopupMounted',
@@ -301,7 +411,10 @@ const onEditParamsConfig = () => {
   chrome.runtime.sendMessage(
     {
       key: 'onSyncStorage',
-      value: toRaw(limitParams),
+      value: {
+        limitParams: toRaw(limitParams),
+        handlingStatus: toRaw(handlingStatus),
+      },
     },
     // @ts-ignore
     (response: TypeByHandleLimitParams) => {
@@ -320,6 +433,76 @@ const onHandleByPause = () => {
     // @ts-ignore
     (response: TypeByHandleLimitParams) => {},
   )
+}
+
+const parseUrlParams = (params: object) => {
+  let url = ''
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      const value = params[key]
+      const item = `${key}=${value}&`
+      if (!url) {
+        url = `?${item}`
+      } else {
+        url = `${url}${item}`
+      }
+    }
+  }
+  return url
+}
+
+// await requestByPost({
+//             data: {
+//                 dyAccount: res.douyinAccount,
+//                 result: JSON.stringify(res)
+//             },
+//             url: 'http://192.168.31.24/static/dy',
+//         });
+
+async function requestByPost(params: {
+  query?: object
+  url: string
+  data?: any
+  isFormData?: boolean
+}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    let url = params.url
+    if (params.query) {
+      url = `${url}${parseUrlParams(params.query)}`
+    }
+    // 配置请求的 URL 和方法（POST）
+    xhr.open('POST', url, true)
+
+    // 设置请求头，指定发送的数据类型为 JSON
+    if (!params.isFormData) {
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
+    }
+
+    // 设置响应类型为 JSON
+    xhr.responseType = 'json'
+
+    // 定义请求完成时的回调函数
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        // // 请求成功，处理响应数据
+        resolve(xhr.response)
+      } else {
+        // 请求失败，处理错误
+        reject('请求失败')
+      }
+    }
+
+    if (params.data) {
+      if (!params.isFormData) {
+        xhr.send(JSON.stringify(params.data))
+      } else {
+        xhr.send(params.data)
+      }
+    } else {
+      xhr.send()
+    }
+  })
 }
 </script>
 
